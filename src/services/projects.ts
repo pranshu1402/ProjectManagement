@@ -49,7 +49,7 @@ function addOne(project: IProject): Promise<any> {
  */
 async function updateOne(project: any): Promise<any> {
   const updatedProject = await projectRepo.findOneAndUpdate(
-    { _id: project._id },
+    { _id: project._id, deleted: false },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     project,
     { projection: defaultProjection }

@@ -49,7 +49,8 @@ app.use(
     const status =
       err instanceof CustomError ? err.HttpStatus : StatusCodes.BAD_REQUEST;
     return res.status(status).json({
-      error: err.message,
+      status,
+      message: err.message,
     });
   }
 );

@@ -20,21 +20,24 @@ export const paths = {
 /**
  * Get all tasks for a project
  */
-taskRouter.get(paths.get, (req: Request, res: Response) => {
+taskRouter.get(paths.get, (req: Request, res: Response, next) => {
   const projectId = req.params.projectId;
   if (!projectId) {
     throw new ParamMissingError();
   }
 
-  const projectById = projectService.getById(projectId);
-
-  return res.status(OK).json({ _id: projectId, tasks: projectById });
+  projectService
+    .getById(projectId)
+    .then((projectById) =>
+      res.status(OK).json({ _id: projectId, tasks: projectById })
+    )
+    .catch((error) => next(error));
 });
 
 /**
  * Add one task
  */
-taskRouter.post(paths.add, (req: Request, res: Response) => {
+taskRouter.post(paths.add, (req: Request, res: Response, next) => {
   const { data } = req.body;
   const projectId = req.params.projectId;
 
@@ -43,25 +46,32 @@ taskRouter.post(paths.add, (req: Request, res: Response) => {
     throw new ParamMissingError();
   }
 
-  projectService.getById(projectId).then((projectData: IProject) => {
-    const panelId = req.params.panelId;
-    const dataToUpdate = {
-      _id: projectId,
-      tasks: TaskController.addTask(data as ITask, panelId, projectData.tasks),
-    };
+  projectService
+    .getById(projectId)
+    .then((projectData: IProject) => {
+      const panelId = req.params.panelId;
+      const dataToUpdate = {
+        _id: projectId,
+        tasks: TaskController.addTask(
+          data as ITask,
+          panelId,
+          projectData.tasks
+        ),
+      };
 
-    projectService
-      .updateOne(dataToUpdate)
-      .then(() =>
-        res.status(CREATED).send({ message: "Task added succesfully" })
-      );
-  });
+      projectService
+        .updateOne(dataToUpdate)
+        .then(() =>
+          res.status(CREATED).send({ message: "Task added succesfully" })
+        );
+    })
+    .catch((error) => next(error));
 });
 
 /**
  * Update one task.
  */
-taskRouter.put(paths.update, (req: Request, res: Response) => {
+taskRouter.put(paths.update, (req: Request, res: Response, next) => {
   const { data } = req.body;
   const projectId = req.params.projectId;
   // Check params
@@ -69,38 +79,48 @@ taskRouter.put(paths.update, (req: Request, res: Response) => {
     throw new ParamMissingError();
   }
 
-  projectService.getById(projectId).then((projectData: IProject) => {
-    const dataToUpdate = {
-      _id: projectId,
-      tasks: TaskController.updateTask(data as ITask, projectData.tasks),
-    };
+  projectService
+    .getById(projectId)
+    .then((projectData: IProject) => {
+      const dataToUpdate = {
+        _id: projectId,
+        tasks: TaskController.updateTask(data as ITask, projectData.tasks),
+      };
 
-    projectService
-      .updateOne(dataToUpdate)
-      .then(() => res.status(OK).send({ message: "Task updated succesfully" }));
-  });
+      projectService
+        .updateOne(dataToUpdate)
+        .then(() =>
+          res.status(OK).send({ message: "Task updated succesfully" })
+        );
+    })
+    .catch((error) => next(error));
 });
 
 /**
  * Delete one task.
  */
-taskRouter.delete(paths.delete, (req: Request, res: Response) => {
+taskRouter.delete(paths.delete, (req: Request, res: Response, next) => {
   const { taskId, projectId } = req.params;
   // Check param
   if (!taskId || !projectId) {
     throw new ParamMissingError();
   }
 
-  projectService.getById(projectId).then((projectData: IProject) => {
-    const dataToUpdate = {
-      _id: projectId,
-      tasks: TaskController.deleteTask(taskId, projectData.tasks),
-    };
+  projectService
+    .getById(projectId)
+    .then((projectData: IProject) => {
+      const dataToUpdate = {
+        _id: projectId,
+        tasks: TaskController.deleteTask(taskId, projectData.tasks),
+      };
 
-    projectService
-      .updateOne(dataToUpdate)
-      .then(() => res.status(OK).send({ message: "Task updated succesfully" }));
-  });
+      projectService
+        .updateOne(dataToUpdate)
+        .then(() =>
+          res.status(OK).send({ message: "Task updated succesfully" })
+        );
+    })
+    .catch((error) => next(error));
 });
 
 export default taskRouter;
