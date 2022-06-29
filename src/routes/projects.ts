@@ -24,7 +24,8 @@ export const paths = {
 projectRouter.get(paths.get, (req: Request, res: Response, next) => {
   /**
    * @Todo
-   * Implement filter, sorting, pagination
+   * Implement filter, sorting, pagination,
+   * Filter records by current user's tenantId
    */
   projectService
     .getAll()
@@ -60,6 +61,9 @@ projectRouter.post(paths.add, (req: Request, res: Response, next) => {
     throw new ParamMissingError();
   }
 
+  /**
+   * @Todo Need projection here for hiding default fields
+   */
   projectService
     .addOne(project as IProject)
     .then((newProject) => res.status(CREATED).json({ data: newProject }))
