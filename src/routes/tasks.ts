@@ -12,8 +12,8 @@ const { CREATED, OK } = StatusCodes;
 
 export const paths = {
   get: "/:projectId/all",
-  add: "/:projectId/add/:panelId",
-  update: "/:projectId/update",
+  add: "/:projectId/add/:panelId?",
+  update: "/:projectId/update/:taskId",
   delete: "/:projectId/delete/:taskId",
 } as const;
 
@@ -26,10 +26,16 @@ taskRouter.get(paths.get, (req: Request, res: Response, next) => {
     throw new ParamMissingError();
   }
 
+  /**
+   * @Todo Can encode task list data in base64
+   */
   projectService
     .getById(projectId)
     .then((projectById) =>
-      res.status(OK).json({ _id: projectId, tasks: projectById })
+      res.status(OK).json({
+        count: projectById?.tasks?.length || 0,
+        data: projectById?.tasks || [],
+      })
     )
     .catch((error) => next(error));
 });
@@ -72,12 +78,15 @@ taskRouter.post(paths.add, (req: Request, res: Response, next) => {
  * Update one task.
  */
 taskRouter.put(paths.update, (req: Request, res: Response, next) => {
-  const { data } = req.body;
-  const projectId = req.params.projectId;
+  let { data } = req.body;
+  const { projectId, taskId } = req.params;
   // Check params
-  if (!data || !projectId) {
+  if (!projectId || !taskId) {
     throw new ParamMissingError();
   }
+
+  data = data || {};
+  data.id = taskId;
 
   projectService
     .getById(projectId)

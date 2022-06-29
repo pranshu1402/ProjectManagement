@@ -7,6 +7,6 @@ const baseRouter = Router();
 
 // Setup routers for all routes
 baseRouter.use("/project", projectRouter);
-baseRouter.use("/tasks", taskRouter);
+baseRouter.use("/task", taskRouter);
 
 export default baseRouter;
