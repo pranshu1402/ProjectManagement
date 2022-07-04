@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import helmet from "helmet";
+import cors from "cors";
 
 import express, { NextFunction, Request, Response } from "express";
 
@@ -22,6 +23,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(cors( {
+  origin: "https://local.deskera.xyz:3000"
+}));
 
 // Show routes called in console during development
 if (

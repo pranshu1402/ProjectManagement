@@ -2,7 +2,7 @@ import StatusCodes from "http-status-codes";
 import { Request, Response, Router } from "express";
 
 import projectService from "@services/projects";
-import { ParamMissingError } from "@shared/errors";
+import { ParamMissingError, UnauthorizedError } from "@shared/errors";
 import { IProject } from "@models/interfaces";
 import { isEmpty } from "@shared/utility";
 
@@ -25,10 +25,17 @@ projectRouter.get(paths.get, (req: Request, res: Response, next) => {
   /**
    * @Todo
    * Implement filter, sorting, pagination,
-   * Filter records by current user's tenantId
+   *
+   * Filter records by current user's tenantId (Get tenant Id from Token instead of params)
    */
+  const tenantId = Number(req.query.tenantId);
+
+  if (!tenantId) {
+    throw new UnauthorizedError();
+  }
+
   projectService
-    .getAll()
+    .getAll(tenantId)
     .then((projects) => {
       res.status(OK).json({ totalCount: projects.length, data: projects });
     })
@@ -55,17 +62,23 @@ projectRouter.get(paths.getById, (req: Request, res: Response, next) => {
  * Add one project.
  */
 projectRouter.post(paths.add, (req: Request, res: Response, next) => {
-  const { project } = req.body;
+  const { data } = req.body;
+  const tenantId = req.query.tenantId;
+  const userId = req.query.userId;
   // Check param
-  if (isEmpty(project)) {
+  if (isEmpty(data)) {
     throw new ParamMissingError();
+  }
+
+  if (!tenantId || !userId) {
+    throw new UnauthorizedError();
   }
 
   /**
    * @Todo Need projection here for hiding default fields
    */
   projectService
-    .addOne(project as IProject)
+    .addOne({ ...data, tenantId, createdBy: userId } as IProject)
     .then((newProject) => res.status(CREATED).json({ data: newProject }))
     .catch((error) => next(error));
 });
@@ -76,12 +89,19 @@ projectRouter.post(paths.add, (req: Request, res: Response, next) => {
 projectRouter.put(paths.update, (req: Request, res: Response, next) => {
   const { data } = req.body;
 
+  const tenantId = req.query.tenantId;
+  const userId = req.query.userId;
+
   if (isEmpty(data) || !data.id) {
     throw new ParamMissingError();
   }
 
+  if (!tenantId || !userId) {
+    throw new UnauthorizedError();
+  }
+
   projectService
-    .updateOne(data as IProject)
+    .updateOne({ ...data, updatedBy: userId } as IProject)
     .then((updatedProject) =>
       res.status(OK).json({
         data: updatedProject,
@@ -96,12 +116,19 @@ projectRouter.put(paths.update, (req: Request, res: Response, next) => {
 projectRouter.patch(paths.update, (req: Request, res: Response, next) => {
   const { data } = req.body;
 
+  const tenantId = req.query.tenantId;
+  const userId = req.query.userId;
+
+  if (!tenantId || !userId) {
+    throw new UnauthorizedError();
+  }
+
   if (isEmpty(data) || !data._id) {
     throw new ParamMissingError();
   }
 
   projectService
-    .updateOne(data)
+    .updateOne({ ...data, updatedBy: userId })
     .then((updatedProject) =>
       res.status(OK).json({
         data: updatedProject,

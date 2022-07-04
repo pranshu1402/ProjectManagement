@@ -10,8 +10,11 @@ const defaultProjection = { deleted: 0, __v: 0 };
  *
  * @returns
  */
-async function getAll(): Promise<IProject[]> {
-  return await projectRepo.find({ deleted: false }, defaultProjection);
+async function getAll(tenantId: number): Promise<IProject[]> {
+  return await projectRepo.find(
+    { $and: [{ deleted: false }, { tenantId: { $eq: tenantId } }] },
+    defaultProjection
+  );
 }
 
 /**

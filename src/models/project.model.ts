@@ -5,9 +5,9 @@ const { Schema } = mongoose;
 
 const ProjectSchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
-      required: [true, "Project name is required"],
+      required: [true, "Project title is required"],
     },
     description: {
       type: String,
@@ -29,13 +29,13 @@ const ProjectSchema = new Schema(
       type: Array<number>,
       default: []
     },
-    createdBy: {
-      type: Number
-    },
     deleted: {
       type: Boolean,
       default: false
-    }
+    },
+    tenantId: Number,
+    createdBy: Number,
+    updatedBy: Number 
   },
   { timestamps: true }
 );

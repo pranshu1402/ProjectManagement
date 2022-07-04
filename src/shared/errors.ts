@@ -19,6 +19,16 @@ export class ParamMissingError extends CustomError {
   }
 }
 
+export class UnauthorizedError extends CustomError {
+  public static readonly Msg =
+    "Unauthorized to access data.";
+  public static readonly HttpStatus = HttpStatusCodes.UNAUTHORIZED;
+
+  constructor() {
+    super(UnauthorizedError.Msg, UnauthorizedError.HttpStatus);
+  }
+}
+
 export class ProjectNotFoundError extends CustomError {
   public static readonly Msg =
     "Project with the given id does not exists in the database.";
