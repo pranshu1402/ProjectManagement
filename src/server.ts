@@ -23,9 +23,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors( {
-  origin: "https://local.deskera.xyz:3000"
-}));
+app.use(
+  cors({
+    origin: process.env.origin,
+  })
+);
 
 // Show routes called in console during development
 if (
